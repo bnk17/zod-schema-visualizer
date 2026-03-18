@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(bun *)",
+      "Bash(bunx *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(ls *)",
+      "Bash(grep *)",
+      "Bash(cat *)"
+    ],
+    "deny": ["Read(./.env*)", "Bash(rm -rf *)"]
+  },
+  "capabilities": {
+    "noExplanation": true,
+    "compactResponse": true
+  },
+  "attribution": {
+    "commit": "🤖 Claude [Bun]"
+  }
+}
