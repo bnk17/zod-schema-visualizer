@@ -15,14 +15,22 @@ interface SchemaInputProps {
 
 export function SchemaInput({ value, onChange, onParse, error }: SchemaInputProps) {
   return (
-    <div className="panel schema-panel">
-      <header className="panel-header">
-        <span className="panel-label">Schema</span>
-        <span className="panel-hint">Paste a Zod <code>z.object()</code> schema</span>
+    <div className="flex flex-1 flex-col overflow-hidden border-r border-(--border)">
+      <header className="flex shrink-0 items-baseline gap-2.5 border-b border-(--border) px-5 py-3.5">
+        <span className="font-mono text-xs font-semibold uppercase tracking-widest text-(--accent)">
+          Schema
+        </span>
+        <span className="text-xs text-(--text)">
+          Paste a Zod{' '}
+          <code className="rounded bg-(--code-bg) px-1.5 py-0.5 font-mono text-xs text-(--text-h)">
+            z.object()
+          </code>{' '}
+          schema
+        </span>
       </header>
 
       <textarea
-        className="schema-textarea"
+        className="flex-1 resize-none bg-(--bg) p-5 font-mono text-sm leading-relaxed text-(--text-h) outline-none [tab-size:2]"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={PLACEHOLDER}
@@ -31,14 +39,22 @@ export function SchemaInput({ value, onChange, onParse, error }: SchemaInputProp
       />
 
       {error && (
-        <p className="parse-error" role="alert">
+        <p
+          className="m-0 shrink-0 border-t border-red-500/20 bg-red-500/10 px-5 py-2.5 text-xs text-red-500"
+          role="alert"
+        >
           {error}
         </p>
       )}
 
-      <button className="parse-btn" onClick={onParse}>
-        Parse Schema
-      </button>
+      <div className="shrink-0 px-5 py-3">
+        <button
+          className="cursor-pointer rounded-md border border-(--accent-border) bg-(--accent-bg) px-4 py-2 text-sm font-medium text-(--accent) transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
+          onClick={onParse}
+        >
+          Parse Schema
+        </button>
+      </div>
     </div>
   )
 }
