@@ -1,1 +1,6 @@
 export { SchemaInput } from './components/SchemaInput'
+export { FormPreview } from './components/FormPreview'
+export { SchemaBuilder } from './builder/components/SchemaBuilder'
+export { buildSchemaText } from './builder/build-schema'
+export { parseSchemaText } from './parse-schema'
+export type { FieldDef, ZodTypeName, ValidatorDef } from './builder/types'
