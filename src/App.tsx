@@ -1,39 +1,40 @@
-import { useCallback, useState } from 'react'
-import { SchemaInput, FormPreview } from './features/schema-visualizer'
-import { SchemaBuilder } from './features/schema-visualizer/builder/components/SchemaBuilder'
-import { parseSchemaText } from './features/schema-visualizer/parse-schema'
-import type { ZodObject, ZodRawShape } from 'zod'
-import './App.css'
+import { useCallback, useState } from 'react';
+import { SchemaInput, FormPreview } from './features/schema-visualizer';
+import { SchemaBuilder } from './features/schema-visualizer/builder/components/SchemaBuilder';
+import { parseSchemaText } from './features/schema-visualizer/parse-schema';
+import type { ZodObject, ZodRawShape } from 'zod';
+import './App.css';
 
-type Mode = 'builder' | 'paste'
+type Mode = 'builder' | 'paste';
 
 function App() {
-  const [mode, setMode] = useState<Mode>('builder')
-  const [schemaText, setSchemaText] = useState('')
-  const [parsedSchema, setParsedSchema] = useState<ZodObject<ZodRawShape> | null>(null)
-  const [parseError, setParseError] = useState<string | null>(null)
+  const [mode, setMode] = useState<Mode>('builder');
+  const [schemaText, setSchemaText] = useState('');
+  const [parsedSchema, setParsedSchema] =
+    useState<ZodObject<ZodRawShape> | null>(null);
+  const [parseError, setParseError] = useState<string | null>(null);
 
   const parse = useCallback((text: string) => {
-    const result = parseSchemaText(text)
+    const result = parseSchemaText(text);
     if (result.ok) {
-      setParsedSchema(result.schema)
-      setParseError(null)
+      setParsedSchema(result.schema);
+      setParseError(null);
     } else {
-      setParsedSchema(null)
-      setParseError(result.error)
+      setParsedSchema(null);
+      setParseError(result.error);
     }
-  }, [])
+  }, []);
 
   function handlePresetSelect(schema: string) {
-    setSchemaText(schema)
-    parse(schema)
+    setSchemaText(schema);
+    parse(schema);
   }
 
   function handleModeSwitch(next: Mode) {
-    setMode(next)
-    setParsedSchema(null)
-    setParseError(null)
-    setSchemaText('')
+    setMode(next);
+    setParsedSchema(null);
+    setParseError(null);
+    setSchemaText('');
   }
 
   return (
@@ -44,15 +45,15 @@ function App() {
           <span className="font-mono text-sm font-semibold tracking-tight text-zinc-900">
             zod-schema-visualizer
           </span>
-          <span className="rounded-full bg-zinc-100 px-3 py-1 font-mono text-xs font-medium uppercase tracking-widest text-zinc-500">
+          <span className="rounded-full bg-zinc-100 px-3 py-1 font-mono text-xs font-medium tracking-widest text-zinc-500 uppercase">
             Portfolio
           </span>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="mx-auto w-full max-w-7xl px-8 pb-12 pt-10">
-        <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-tight text-zinc-900">
+      <section className="mx-auto w-full max-w-7xl px-8 pt-10 pb-12">
+        <h1 className="max-w-4xl text-4xl leading-tight font-semibold tracking-tight text-zinc-900">
           A live Zod schema visualizer that parses your schema and generates a
           type-safe form in real time.
         </h1>
@@ -62,7 +63,7 @@ function App() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
           </span>
-          <span className="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-500">
+          <span className="font-mono text-xs font-semibold tracking-widest text-zinc-500 uppercase">
             Available for a frontend role
           </span>
         </div>
@@ -80,7 +81,7 @@ function App() {
       {/* Mode toggle */}
       <div className="mx-auto w-full max-w-7xl px-8 pb-5">
         <div className="inline-flex rounded-full border border-zinc-200 bg-zinc-50 p-1">
-          {(['builder', 'paste'] as const).map(m => (
+          {(['builder', 'paste'] as const).map((m) => (
             <button
               key={m}
               type="button"
@@ -102,7 +103,7 @@ function App() {
         <div className="grid grid-cols-2 gap-5" style={{ minHeight: '520px' }}>
           {/* Left panel */}
           {mode === 'builder' ? (
-            <SchemaBuilder onChange={text => parse(text)} />
+            <SchemaBuilder onChange={(text) => parse(text)} />
           ) : (
             <SchemaInput
               value={schemaText}
@@ -116,8 +117,12 @@ function App() {
           {/* Right panel — form preview */}
           <div className="flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="flex shrink-0 items-center gap-2 border-b border-zinc-100 px-5 py-3">
-              <span className="text-sm text-zinc-400" aria-hidden>✦</span>
-              <span className="text-sm font-semibold text-zinc-900">Form Preview</span>
+              <span className="text-sm text-zinc-400" aria-hidden>
+                ✦
+              </span>
+              <span className="text-sm font-semibold text-zinc-900">
+                Form Preview
+              </span>
               {parsedSchema && (
                 <span className="ml-auto rounded-full bg-zinc-100 px-2 py-0.5 font-mono text-xs text-zinc-500">
                   {Object.keys(parsedSchema.shape).length} fields
@@ -142,7 +147,7 @@ function App() {
         </a>
       </footer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
