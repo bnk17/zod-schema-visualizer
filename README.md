@@ -48,4 +48,3 @@ bun run dev
 bun vitest      # Logic & Unit tests
 bun playwright  # Browser E2E tests
 ```
-# zod-schema-visualizer

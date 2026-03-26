@@ -15,14 +15,14 @@ interface SchemaInputProps {
 
 export function SchemaInput({ value, onChange, onParse, error }: SchemaInputProps) {
   return (
-    <div className="flex flex-1 flex-col overflow-hidden border-r border-(--border)">
-      <header className="flex shrink-0 items-baseline gap-2.5 border-b border-(--border) px-5 py-3.5">
+    <div className="flex flex-1 flex-col overflow-hidden border-r border-zinc-200">
+      <header className="flex shrink-0 items-baseline gap-2.5 border-b border-zinc-200 px-5 py-3.5">
         <span className="font-mono text-xs font-semibold uppercase tracking-widest text-(--accent)">
           Schema
         </span>
-        <span className="text-xs text-(--text)">
+        <span className="text-xs text-zinc-400">
           Paste a Zod{' '}
-          <code className="rounded bg-(--code-bg) px-1.5 py-0.5 font-mono text-xs text-(--text-h)">
+          <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs text-zinc-700">
             z.object()
           </code>{' '}
           schema
@@ -30,7 +30,7 @@ export function SchemaInput({ value, onChange, onParse, error }: SchemaInputProp
       </header>
 
       <textarea
-        className="flex-1 resize-none bg-(--bg) p-5 font-mono text-sm leading-relaxed text-(--text-h) outline-none [tab-size:2]"
+        className="flex-1 resize-none bg-white p-5 font-mono text-sm leading-relaxed text-zinc-900 outline-none [tab-size:2]"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={PLACEHOLDER}
