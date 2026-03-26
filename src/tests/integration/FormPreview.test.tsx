@@ -65,9 +65,7 @@ describe('field rendering', () => {
 
   it('renders a toggle (switch) for a boolean field', () => {
     render(<FormPreview schema={booleanSchema} />);
-    expect(
-      screen.getByRole('switch', { name: /active/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('switch', { name: /active/i })).toBeInTheDocument();
   });
 
   it('renders a select element for an enum field with all options', () => {
@@ -276,9 +274,7 @@ describe('Back to form', () => {
 
     await user.click(screen.getByRole('button', { name: /back to form/i }));
 
-    expect(
-      screen.getByRole('button', { name: /submit/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
     expect(screen.queryByText(/schema validated/i)).not.toBeInTheDocument();
   });
 });
