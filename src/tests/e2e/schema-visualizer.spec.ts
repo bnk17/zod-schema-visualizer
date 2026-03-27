@@ -97,10 +97,13 @@ test.describe('Form validation', () => {
     await page.getByRole('button', { name: 'User Profile' }).click()
   })
 
-  test('Submit button is disabled when required fields are empty', async ({
+  test('Submit button is always enabled and shows inline errors on empty submit', async ({
     page,
   }) => {
-    await expect(page.getByRole('button', { name: /submit/i })).toBeDisabled()
+    const submit = page.getByRole('button', { name: /submit/i })
+    await expect(submit).toBeEnabled()
+    await submit.click()
+    await expect(page.getByText(/this field is required/i).first()).toBeVisible()
   })
 
   test('shows field-level error for invalid email on submit', async ({
