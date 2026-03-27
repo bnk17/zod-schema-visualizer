@@ -24,7 +24,7 @@ export function SchemaInput({
   error,
 }: SchemaInputProps) {
   return (
-    <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+    <div className="flex h-full flex-1 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
       {/* Header */}
       <div className="flex shrink-0 items-center gap-2 border-b border-zinc-100 px-5 py-3">
         <span className="text-sm text-zinc-400" aria-hidden>
@@ -60,7 +60,7 @@ export function SchemaInput({
         </div>
 
         {/* Error + action row */}
-        <div className="flex min-h-[32px] items-center justify-between gap-3">
+        <div className="flex min-h-8 items-center justify-between gap-3">
           {error ? (
             <p className="text-xs text-red-500" role="alert">
               {error}
