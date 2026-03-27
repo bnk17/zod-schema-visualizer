@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { SchemaInput, FormPreview } from './features/schema-visualizer';
 import { SchemaBuilder } from './features/schema-visualizer/builder/components/SchemaBuilder';
 import { parseSchemaText } from './features/schema-visualizer/parse-schema';
@@ -14,6 +14,7 @@ function App() {
   const [parsedSchema, setParsedSchema] =
     useState<ZodObject<ZodRawShape> | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
 
   const parse = useCallback((text: string) => {
     const result = parseSchemaText(text);
@@ -36,6 +37,12 @@ function App() {
     setParsedSchema(null);
     setParseError(null);
     setSchemaText('');
+    setTimeout(() => {
+      leftPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }, 0);
   }
 
   return (
@@ -100,20 +107,22 @@ function App() {
       </div>
 
       {/* Schema + Preview panels */}
-      <section className="mx-auto w-full max-w-7xl flex-1 px-8 pb-5">
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:min-h-[520px]">
+      <section className="mx-auto w-full max-w-7xl flex-1 px-8 pb-10">
+        <div className="grid grid-cols-1 gap-5 lg:min-h-130 lg:grid-cols-2">
           {/* Left panel */}
-          {mode === 'builder' ? (
-            <SchemaBuilder onChange={(text) => parse(text)} />
-          ) : (
-            <SchemaInput
-              value={schemaText}
-              onChange={setSchemaText}
-              onVisualize={() => parse(schemaText)}
-              onPresetSelect={handlePresetSelect}
-              error={parseError}
-            />
-          )}
+          <div ref={leftPanelRef}>
+            {mode === 'builder' ? (
+              <SchemaBuilder onChange={(text) => parse(text)} />
+            ) : (
+              <SchemaInput
+                value={schemaText}
+                onChange={setSchemaText}
+                onVisualize={() => parse(schemaText)}
+                onPresetSelect={handlePresetSelect}
+                error={parseError}
+              />
+            )}
+          </div>
 
           {/* Right panel — form preview */}
           <div className="flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
