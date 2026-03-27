@@ -38,15 +38,21 @@ export function TypePanel({ schema }: TypePanelProps) {
           <button
             type="button"
             onClick={handleCopy}
-            className="flex items-center gap-1.5 rounded-full border border-zinc-200 px-3 py-1 font-mono text-xs text-zinc-500 transition-colors hover:border-zinc-400 hover:text-zinc-900"
+            className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              copied
+                ? 'bg-green-600 text-white'
+                : 'bg-zinc-900 text-white hover:bg-zinc-700'
+            }`}
           >
             {copied ? (
               <>
-                <span aria-hidden>✓</span> Copied
+                <CheckIcon />
+                Copied
               </>
             ) : (
               <>
-                <span aria-hidden>⎘</span> Copy type
+                <ClipboardIcon />
+                Copy type
               </>
             )}
           </button>
@@ -56,6 +62,23 @@ export function TypePanel({ schema }: TypePanelProps) {
         </pre>
       </div>
     </div>
+  )
+}
+
+function ClipboardIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="9" y="2" width="6" height="4" rx="1" />
+      <path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
   )
 }
 
