@@ -283,10 +283,6 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
 
-  const canSubmit = fields
-    .filter((f) => !f.optional && (f.type === 'string' || f.type === 'number'))
-    .every((f) => String(values[f.name] ?? '').trim() !== '');
-
   function setValue(key: string, val: unknown) {
     setValues((prev) => ({ ...prev, [key]: val }));
     setFieldErrors((prev) => {
@@ -397,8 +393,7 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
           )}
           <button
             type="submit"
-            disabled={!canSubmit}
-            className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
           >
             Submit
             <span aria-hidden>→</span>
