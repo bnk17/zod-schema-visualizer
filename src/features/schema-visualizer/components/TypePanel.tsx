@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { ZodObject, ZodRawShape } from 'zod'
 import { generateTsType } from '../generate-ts-type'
 
@@ -8,6 +8,13 @@ interface TypePanelProps {
 
 export function TypePanel({ schema }: TypePanelProps) {
   const [copied, setCopied] = useState(false)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (schema) {
+      panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [schema])
 
   if (!schema) return null
 
@@ -21,7 +28,7 @@ export function TypePanel({ schema }: TypePanelProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-8 pb-16">
+    <div ref={panelRef} className="mx-auto w-full max-w-7xl px-8 pb-16">
       <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3">
           <div className="flex items-center gap-2">
