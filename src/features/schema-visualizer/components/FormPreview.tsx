@@ -300,6 +300,21 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    // Required-field gate: z.string() accepts '' by default so we enforce
+    // non-empty ourselves before handing off to safeParse.
+    const requiredErrors: Record<string, string> = {};
+    for (const field of fields) {
+      if (!field.optional && (field.type === 'string' || field.type === 'number')) {
+        if (String(values[field.name] ?? '').trim() === '') {
+          requiredErrors[field.name] = 'This field is required';
+        }
+      }
+    }
+    if (Object.keys(requiredErrors).length > 0) {
+      setFieldErrors(requiredErrors);
+      return;
+    }
+
     const coerced = coerceForParse(fields, values);
     const result = schema.safeParse(coerced);
 

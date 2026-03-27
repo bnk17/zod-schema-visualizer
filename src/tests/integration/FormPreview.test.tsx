@@ -191,14 +191,23 @@ describe('submit with invalid data shows errors', () => {
     expect(screen.getByText(/1 field failed validation/i)).toBeInTheDocument();
   });
 
-  it('shows errors when form is submitted directly with empty required fields', () => {
-    const schema = z.object({ name: z.string().min(1, 'Name is required') });
+  it('shows "required" error when form is submitted directly with empty required fields', () => {
+    const schema = z.object({ name: z.string() });
     const { container } = render(<FormPreview schema={schema} />);
 
     // Bypass the disabled-button gate by submitting the form element directly
     submitForm(container);
 
-    expect(screen.getByText(/name is required/i)).toBeInTheDocument();
+    expect(screen.getByText(/this field is required/i)).toBeInTheDocument();
+  });
+
+  it('does not reach success state when required fields are empty (z.string() accepts "" by default)', () => {
+    const schema = z.object({ name: z.string() });
+    const { container } = render(<FormPreview schema={schema} />);
+
+    submitForm(container);
+
+    expect(screen.queryByText(/schema validated/i)).not.toBeInTheDocument();
   });
 });
 
