@@ -84,7 +84,9 @@ function TextField({
         type={field.type === 'number' ? 'number' : 'text'}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={field.type === 'number' ? '0' : field.label}
+        placeholder={
+          field.type === 'number' ? '0' : `Enter ${field.label} value`
+        }
         aria-invalid={hasError || undefined}
         className={`rounded-lg border px-3 py-2 text-sm transition-colors outline-none placeholder:text-zinc-400 ${
           hasError
@@ -296,21 +298,6 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    // Required-field gate: z.string() accepts '' by default so we enforce
-    // non-empty ourselves before handing off to safeParse.
-    const requiredErrors: Record<string, string> = {};
-    for (const field of fields) {
-      if (!field.optional && (field.type === 'string' || field.type === 'number')) {
-        if (String(values[field.name] ?? '').trim() === '') {
-          requiredErrors[field.name] = 'This field is required';
-        }
-      }
-    }
-    if (Object.keys(requiredErrors).length > 0) {
-      setFieldErrors(requiredErrors);
-      return;
-    }
-
     const coerced = coerceForParse(fields, values);
     const result = schema.safeParse(coerced);
 
@@ -393,7 +380,7 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
           )}
           <button
             type="submit"
-            className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+            className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Submit
             <span aria-hidden>→</span>

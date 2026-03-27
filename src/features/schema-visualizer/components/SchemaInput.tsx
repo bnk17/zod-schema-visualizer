@@ -1,4 +1,4 @@
-import { PRESETS } from '../presets'
+import { PRESETS } from '../presets';
 
 const PLACEHOLDER = `z.object({
   name: z.string().min(2),
@@ -6,14 +6,14 @@ const PLACEHOLDER = `z.object({
   email: z.string().email(),
   role: z.enum(["admin", "user"]),
   isActive: z.boolean(),
-})`
+})`;
 
 interface SchemaInputProps {
-  value: string
-  onChange: (value: string) => void
-  onVisualize: () => void
-  onPresetSelect: (schema: string) => void
-  error: string | null
+  value: string;
+  onChange: (value: string) => void;
+  onVisualize: () => void;
+  onPresetSelect: (schema: string) => void;
+  error: string | null;
 }
 
 export function SchemaInput({
@@ -24,10 +24,12 @@ export function SchemaInput({
   error,
 }: SchemaInputProps) {
   return (
-    <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+    <div className="flex h-full flex-1 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
       {/* Header */}
       <div className="flex shrink-0 items-center gap-2 border-b border-zinc-100 px-5 py-3">
-        <span className="text-sm text-zinc-400" aria-hidden>✦</span>
+        <span className="text-sm text-zinc-400" aria-hidden>
+          ✦
+        </span>
         <span className="text-sm font-semibold text-zinc-900">Schema</span>
       </div>
 
@@ -35,17 +37,17 @@ export function SchemaInput({
       <textarea
         className="flex-1 resize-none bg-transparent px-5 py-4 font-mono text-sm leading-relaxed text-zinc-900 outline-none [tab-size:2] placeholder:font-mono placeholder:text-zinc-300"
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={PLACEHOLDER}
         spellCheck={false}
         aria-label="Zod schema input"
       />
 
       {/* Bottom toolbar */}
-      <div className="shrink-0 border-t border-zinc-100 px-4 pb-4 pt-3">
+      <div className="shrink-0 border-t border-zinc-100 px-4 pt-3 pb-4">
         {/* Preset chips */}
         <div className="mb-3 flex flex-wrap gap-2">
-          {PRESETS.map(preset => (
+          {PRESETS.map((preset) => (
             <button
               key={preset.id}
               type="button"
@@ -58,9 +60,11 @@ export function SchemaInput({
         </div>
 
         {/* Error + action row */}
-        <div className="flex min-h-[32px] items-center justify-between gap-3">
+        <div className="flex min-h-8 items-center justify-between gap-3">
           {error ? (
-            <p className="text-xs text-red-500" role="alert">{error}</p>
+            <p className="text-xs text-red-500" role="alert">
+              {error}
+            </p>
           ) : (
             <span />
           )}
@@ -76,5 +80,5 @@ export function SchemaInput({
         </div>
       </div>
     </div>
-  )
+  );
 }
