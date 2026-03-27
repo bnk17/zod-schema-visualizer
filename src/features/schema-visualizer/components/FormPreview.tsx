@@ -298,6 +298,17 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    const requiredErrors: Record<string, string> = {};
+    for (const field of fields) {
+      if (!field.optional && field.type === 'string' && values[field.name] === '') {
+        requiredErrors[field.name] = 'This field is required';
+      }
+    }
+    if (Object.keys(requiredErrors).length > 0) {
+      setFieldErrors(requiredErrors);
+      return;
+    }
+
     const coerced = coerceForParse(fields, values);
     const result = schema.safeParse(coerced);
 
