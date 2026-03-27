@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { TypeSelectPopup } from './TypeSelectPopup'
+import { EnumValuesEditor } from './EnumValuesEditor'
 import { VALIDATORS_BY_TYPE } from '../zod-options'
 import type { FieldDef, ValidatorDef, ZodTypeName } from '../types'
 
@@ -91,6 +92,14 @@ export function FieldRow({ field, onChange, onRemove, onAddNext }: FieldRowProps
           </>
         )}
       </div>
+
+      {/* Enum values editor */}
+      {field.type === 'enum' && (
+        <EnumValuesEditor
+          values={field.enumValues}
+          onChange={enumValues => onChange({ ...field, enumValues })}
+        />
+      )}
 
       {/* Validator chips */}
       {availableValidators.map(v => (
