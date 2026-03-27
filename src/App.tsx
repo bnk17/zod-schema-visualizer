@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { SchemaInput, FormPreview } from './features/schema-visualizer';
 import { SchemaBuilder } from './features/schema-visualizer/builder/components/SchemaBuilder';
 import { parseSchemaText } from './features/schema-visualizer/parse-schema';
+import { TypePanel } from './features/schema-visualizer/components/TypePanel';
 import type { ZodObject, ZodRawShape } from 'zod';
 import './App.css';
 
@@ -99,7 +100,7 @@ function App() {
       </div>
 
       {/* Schema + Preview panels */}
-      <section className="mx-auto w-full max-w-7xl flex-1 px-8 pb-16">
+      <section className="mx-auto w-full max-w-7xl flex-1 px-8 pb-5">
         <div className="grid grid-cols-2 gap-5" style={{ minHeight: '520px' }}>
           {/* Left panel */}
           {mode === 'builder' ? (
@@ -133,6 +134,9 @@ function App() {
           </div>
         </div>
       </section>
+
+      {/* TypeScript type panel */}
+      <TypePanel schema={parsedSchema} />
 
       {/* Footer */}
       <footer className="flex shrink-0 items-center justify-between border-t border-zinc-200 px-8 py-4 text-sm text-zinc-400">
