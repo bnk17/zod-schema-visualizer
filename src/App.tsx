@@ -100,7 +100,7 @@ function App() {
 
       {/* Schema + Preview panels */}
       <section className="mx-auto w-full max-w-7xl flex-1 px-8 pb-5">
-        <div className="grid grid-cols-2 gap-5" style={{ minHeight: '520px' }}>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:min-h-[520px]">
           {/* Left panel */}
           {mode === 'builder' ? (
             <SchemaBuilder onChange={text => parse(text)} />
