@@ -14,6 +14,7 @@ interface FieldRowProps {
 export function FieldRow({ field, onChange, onRemove, onAddNext }: FieldRowProps) {
   const [showTypePopup, setShowTypePopup] = useState(false)
   const nameRef = useRef<HTMLInputElement>(null)
+  const enumInputRef = useRef<HTMLInputElement>(null)
 
   function handleNameKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Tab' && !e.shiftKey && field.name.trim()) {
@@ -29,7 +30,11 @@ export function FieldRow({ field, onChange, onRemove, onAddNext }: FieldRowProps
   function handleTypeSelect(type: ZodTypeName) {
     onChange({ ...field, type, validators: [] })
     setShowTypePopup(false)
-    nameRef.current?.focus()
+    if (type === 'enum') {
+      setTimeout(() => enumInputRef.current?.focus(), 0)
+    } else {
+      nameRef.current?.focus()
+    }
   }
 
   function toggleValidator(name: string) {
@@ -96,6 +101,7 @@ export function FieldRow({ field, onChange, onRemove, onAddNext }: FieldRowProps
       {/* Enum values editor */}
       {field.type === 'enum' && (
         <EnumValuesEditor
+          ref={enumInputRef}
           values={field.enumValues}
           onChange={enumValues => onChange({ ...field, enumValues })}
         />
