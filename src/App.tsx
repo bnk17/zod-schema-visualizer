@@ -1,12 +1,12 @@
-import { useCallback, useState } from 'react';
-import { SchemaInput, FormPreview } from './features/schema-visualizer';
+import { useCallback, useRef, useState } from 'react';
+import { SchemaInput, FormPreview, GeneratePanel } from './features/schema-visualizer';
 import { SchemaBuilder } from './features/schema-visualizer/builder/components/SchemaBuilder';
 import { parseSchemaText } from './features/schema-visualizer/parse-schema';
 import { TypePanel } from './features/schema-visualizer/components/TypePanel';
 import type { ZodObject, ZodRawShape } from 'zod';
 import './App.css';
 
-type Mode = 'builder' | 'paste';
+type Mode = 'builder' | 'paste' | 'generate';
 
 function App() {
   const [mode, setMode] = useState<Mode>('builder');
@@ -14,6 +14,7 @@ function App() {
   const [parsedSchema, setParsedSchema] =
     useState<ZodObject<ZodRawShape> | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
 
   const parse = useCallback((text: string) => {
     const result = parseSchemaText(text);
@@ -31,11 +32,23 @@ function App() {
     parse(schema);
   }
 
+  function handleGeneratedSchema(schema: string) {
+    setSchemaText(schema);
+    parse(schema);
+    setMode('paste');
+  }
+
   function handleModeSwitch(next: Mode) {
     setMode(next);
     setParsedSchema(null);
     setParseError(null);
     setSchemaText('');
+    setTimeout(() => {
+      leftPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }, 0);
   }
 
   return (
@@ -82,18 +95,20 @@ function App() {
       {/* Mode toggle */}
       <div className="mx-auto w-full max-w-7xl px-8 pb-5">
         <div className="inline-flex rounded-full border border-zinc-200 bg-zinc-50 p-1">
-          {(['builder', 'paste'] as const).map((m) => (
+          {(['builder', 'paste', 'generate'] as const).map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => handleModeSwitch(m)}
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 mode === m
-                  ? 'bg-zinc-900 text-white shadow-sm'
+                  ? m === 'generate'
+                    ? 'bg-violet-600 text-white shadow-sm'
+                    : 'bg-zinc-900 text-white shadow-sm'
                   : 'text-zinc-500 hover:text-zinc-700'
               }`}
             >
-              {m === 'builder' ? 'Builder' : 'Paste schema'}
+              {m === 'builder' ? 'Builder' : m === 'paste' ? 'Paste schema' : 'AI Generate'}
             </button>
           ))}
         </div>
@@ -103,17 +118,21 @@ function App() {
       <section className="mx-auto w-full max-w-7xl flex-1 px-8 pb-5">
         <div className="grid grid-cols-2 gap-5" style={{ minHeight: '520px' }}>
           {/* Left panel */}
-          {mode === 'builder' ? (
-            <SchemaBuilder onChange={(text) => parse(text)} />
-          ) : (
-            <SchemaInput
-              value={schemaText}
-              onChange={setSchemaText}
-              onVisualize={() => parse(schemaText)}
-              onPresetSelect={handlePresetSelect}
-              error={parseError}
-            />
-          )}
+          <div ref={leftPanelRef}>
+            {mode === 'builder' ? (
+              <SchemaBuilder onChange={(text) => parse(text)} />
+            ) : mode === 'paste' ? (
+              <SchemaInput
+                value={schemaText}
+                onChange={setSchemaText}
+                onVisualize={() => parse(schemaText)}
+                onPresetSelect={handlePresetSelect}
+                error={parseError}
+              />
+            ) : (
+              <GeneratePanel onSchemaGenerated={handleGeneratedSchema} />
+            )}
+          </div>
 
           {/* Right panel — form preview */}
           <div className="flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
