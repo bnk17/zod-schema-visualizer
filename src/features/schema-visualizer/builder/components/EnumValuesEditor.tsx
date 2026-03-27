@@ -1,13 +1,16 @@
-import { useRef, useState } from 'react'
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 
 interface EnumValuesEditorProps {
   values: string[]
   onChange: (values: string[]) => void
 }
 
-export function EnumValuesEditor({ values, onChange }: EnumValuesEditorProps) {
+export const EnumValuesEditor = forwardRef<HTMLInputElement, EnumValuesEditorProps>(
+  function EnumValuesEditor({ values, onChange }, ref) {
   const [draft, setDraft] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useImperativeHandle(ref, () => inputRef.current!)
 
   function commit() {
     const trimmed = draft.trim()
@@ -67,4 +70,4 @@ export function EnumValuesEditor({ values, onChange }: EnumValuesEditorProps) {
       />
     </div>
   )
-}
+})
