@@ -16,11 +16,16 @@ test.describe('Page load', () => {
   })
 
   test('Visualize button is disabled on load', async ({ page }) => {
+    await page.getByRole('button', { name: /paste schema/i }).click()
     await expect(page.getByRole('button', { name: /visualize/i })).toBeDisabled()
   })
 })
 
 test.describe('Preset selection', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.getByRole('button', { name: /paste schema/i }).click()
+  })
+
   test('loads a preset schema into the textarea when a chip is clicked', async ({
     page,
   }) => {
@@ -58,6 +63,10 @@ test.describe('Preset selection', () => {
 })
 
 test.describe('Manual schema input', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.getByRole('button', { name: /paste schema/i }).click()
+  })
+
   test('Visualize button enables after typing a schema', async ({ page }) => {
     await page.getByRole('textbox', { name: /zod schema input/i }).fill(
       "z.object({ title: z.string() })",
@@ -84,6 +93,7 @@ test.describe('Manual schema input', () => {
 
 test.describe('Form validation', () => {
   test.beforeEach(async ({ page }) => {
+    await page.getByRole('button', { name: /paste schema/i }).click()
     await page.getByRole('button', { name: 'User Profile' }).click()
   })
 
