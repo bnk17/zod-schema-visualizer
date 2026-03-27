@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
@@ -22,15 +22,6 @@ const booleanSchema = z.object({
 const enumSchema = z.object({
   role: z.enum(['admin', 'editor', 'viewer']),
 });
-
-// ── helpers ───────────────────────────────────────────────────────────────────
-
-/** Submit the form directly, bypassing the disabled-button gate. */
-function submitForm(container: HTMLElement) {
-  const form = container.querySelector('form');
-  if (!form) throw new Error('No form found');
-  fireEvent.submit(form);
-}
 
 // ── 1. EmptyState ─────────────────────────────────────────────────────────────
 
@@ -93,35 +84,20 @@ describe('field rendering', () => {
   });
 });
 
-// ── 3. canSubmit gate ─────────────────────────────────────────────────────────
+// ── 3. Submit button is always enabled ────────────────────────────────────────
 
-describe('canSubmit gate', () => {
-  it('Submit button is disabled when required fields are empty', () => {
+describe('Submit button', () => {
+  it('is always enabled regardless of field values', () => {
     render(<FormPreview schema={stringSchema} />);
-    expect(screen.getByRole('button', { name: /submit/i })).toBeDisabled();
-  });
-
-  it('Submit button becomes enabled once all required fields have a value', async () => {
-    const user = userEvent.setup();
-    render(<FormPreview schema={stringSchema} />);
-    await user.type(screen.getByLabelText(/username/i), 'alice');
     expect(screen.getByRole('button', { name: /submit/i })).toBeEnabled();
   });
 
-  it('optional fields do not block submission', async () => {
-    const user = userEvent.setup();
-    render(<FormPreview schema={stringSchema} />);
-    // Fill only the required field, leave optional bio empty
-    await user.type(screen.getByLabelText(/username/i), 'alice');
-    expect(screen.getByRole('button', { name: /submit/i })).toBeEnabled();
-  });
-
-  it('Submit button for boolean-only schema is enabled immediately', () => {
+  it('is enabled immediately for boolean-only schemas', () => {
     render(<FormPreview schema={booleanSchema} />);
     expect(screen.getByRole('button', { name: /submit/i })).toBeEnabled();
   });
 
-  it('Submit button for enum-only schema is enabled immediately', () => {
+  it('is enabled immediately for enum-only schemas', () => {
     render(<FormPreview schema={enumSchema} />);
     expect(screen.getByRole('button', { name: /submit/i })).toBeEnabled();
   });
@@ -131,7 +107,6 @@ describe('canSubmit gate', () => {
 
 describe('submit with invalid data shows errors', () => {
   it('shows an error message for a field that fails zod validation', async () => {
-    // min(3) — type "ab" (2 chars) to pass canSubmit but fail safeParse
     const schema = z.object({
       name: z.string().min(3, 'Name is too short'),
     });
@@ -189,21 +164,22 @@ describe('submit with invalid data shows errors', () => {
     expect(screen.getByText(/1 field failed validation/i)).toBeInTheDocument();
   });
 
-  it('shows "required" error when form is submitted directly with empty required fields', () => {
+  it('shows "required" error when submit is clicked with empty required fields', async () => {
     const schema = z.object({ name: z.string() });
-    const { container } = render(<FormPreview schema={schema} />);
+    const user = userEvent.setup();
+    render(<FormPreview schema={schema} />);
 
-    // Bypass the disabled-button gate by submitting the form element directly
-    submitForm(container);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
 
     expect(screen.getByText(/this field is required/i)).toBeInTheDocument();
   });
 
-  it('does not reach success state when required fields are empty (z.string() accepts "" by default)', () => {
+  it('does not reach success state when required fields are empty', async () => {
     const schema = z.object({ name: z.string() });
-    const { container } = render(<FormPreview schema={schema} />);
+    const user = userEvent.setup();
+    render(<FormPreview schema={schema} />);
 
-    submitForm(container);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
 
     expect(screen.queryByText(/schema validated/i)).not.toBeInTheDocument();
   });
