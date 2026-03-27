@@ -1,4 +1,6 @@
-export const runtime = 'edge';
+export const config = { runtime: 'edge' };
+
+declare const process: { env: Record<string, string | undefined> };
 
 const SYSTEM_PROMPT = `You are a Zod schema code generator. Your only job is to output a single valid Zod schema expression.
 
