@@ -24,7 +24,7 @@ Object.defineProperty(navigator, 'clipboard', {
   writable: true,
 });
 
-const writeTextSpy = vi.spyOn(clipboardStub, 'writeText').mockResolvedValue(undefined);
+const writeTextSpy = vi.spyOn(clipboardStub, 'writeText').mockResolvedValue('');
 
 beforeEach(() => {
   writeTextSpy.mockClear();
