@@ -1,10 +1,10 @@
 export class GenerationError extends Error {
-  constructor(
-    message: string,
-    public readonly status: number
-  ) {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
     super(message);
     this.name = 'GenerationError';
+    this.status = status;
   }
 }
 
