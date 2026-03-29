@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { SchemaInput, FormPreview, GeneratePanel } from './features/schema-visualizer';
 import { SchemaBuilder } from './features/schema-visualizer/builder/components/SchemaBuilder';
 import { parseSchemaText } from './features/schema-visualizer/parse-schema';
@@ -100,15 +101,22 @@ function App() {
               key={m}
               type="button"
               onClick={() => handleModeSwitch(m)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                mode === m
-                  ? m === 'generate'
-                    ? 'bg-violet-600 text-white shadow-sm'
-                    : 'bg-zinc-900 text-white shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-700'
+              className={`relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                mode === m ? 'text-white' : 'text-zinc-500 hover:text-zinc-700'
               }`}
             >
-              {m === 'builder' ? 'Builder' : m === 'paste' ? 'Paste schema' : 'AI Generate'}
+              {mode === m && (
+                <motion.span
+                  layoutId="tab-bg"
+                  className={`absolute inset-0 rounded-full shadow-sm ${
+                    m === 'generate' ? 'bg-violet-600' : 'bg-zinc-900'
+                  }`}
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
+                />
+              )}
+              <span className="relative">
+                {m === 'builder' ? 'Builder' : m === 'paste' ? 'Paste schema' : 'AI Generate'}
+              </span>
             </button>
           ))}
         </div>
@@ -119,19 +127,30 @@ function App() {
         <div className="grid grid-cols-2 gap-5" style={{ minHeight: '520px' }}>
           {/* Left panel */}
           <div ref={leftPanelRef}>
-            {mode === 'builder' ? (
-              <SchemaBuilder onChange={(text) => parse(text)} />
-            ) : mode === 'paste' ? (
-              <SchemaInput
-                value={schemaText}
-                onChange={setSchemaText}
-                onVisualize={() => parse(schemaText)}
-                onPresetSelect={handlePresetSelect}
-                error={parseError}
-              />
-            ) : (
-              <GeneratePanel onSchemaGenerated={handleGeneratedSchema} />
-            )}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={mode}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="h-full"
+              >
+                {mode === 'builder' ? (
+                  <SchemaBuilder onChange={(text) => parse(text)} />
+                ) : mode === 'paste' ? (
+                  <SchemaInput
+                    value={schemaText}
+                    onChange={setSchemaText}
+                    onVisualize={() => parse(schemaText)}
+                    onPresetSelect={handlePresetSelect}
+                    error={parseError}
+                  />
+                ) : (
+                  <GeneratePanel onSchemaGenerated={handleGeneratedSchema} />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Right panel — form preview */}
@@ -143,11 +162,20 @@ function App() {
               <span className="text-sm font-semibold text-zinc-900">
                 Form Preview
               </span>
-              {parsedSchema && (
-                <span className="ml-auto rounded-full bg-zinc-100 px-2 py-0.5 font-mono text-xs text-zinc-500">
-                  {Object.keys(parsedSchema.shape).length} fields
-                </span>
-              )}
+              <AnimatePresence>
+                {parsedSchema && (
+                  <motion.span
+                    key="field-count"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                    className="ml-auto rounded-full bg-zinc-100 px-2 py-0.5 font-mono text-xs text-zinc-500"
+                  >
+                    {Object.keys(parsedSchema.shape).length} fields
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </div>
             <FormPreview schema={parsedSchema} />
           </div>
@@ -155,7 +183,9 @@ function App() {
       </section>
 
       {/* TypeScript type panel */}
-      <TypePanel schema={parsedSchema} />
+      <AnimatePresence>
+        {parsedSchema && <TypePanel schema={parsedSchema} />}
+      </AnimatePresence>
 
       {/* Footer */}
       <footer className="flex shrink-0 items-center justify-between border-t border-zinc-200 px-8 py-4 text-sm text-zinc-400">

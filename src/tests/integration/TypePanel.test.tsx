@@ -8,6 +8,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { z } from 'zod';
 import { TypePanel } from '../../features/schema-visualizer/components/TypePanel';
 
+// jsdom does not implement scrollIntoView
+Element.prototype.scrollIntoView = vi.fn();
+
 // ── clipboard mock ─────────────────────────────────────────────────────────────
 // jsdom does not implement navigator.clipboard; install a plain object so the
 // component's `navigator.clipboard.writeText(...)` call succeeds, then spy on
