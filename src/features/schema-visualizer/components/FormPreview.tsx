@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { type ZodObject, type ZodRawShape, type ZodTypeAny } from 'zod';
 
 interface FormPreviewProps {
@@ -84,7 +85,9 @@ function TextField({
         type={field.type === 'number' ? 'number' : 'text'}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={field.type === 'number' ? '0' : field.label}
+        placeholder={
+          field.type === 'number' ? '0' : `Enter ${field.label} value`
+        }
         aria-invalid={hasError || undefined}
         className={`rounded-lg border px-3 py-2 text-sm transition-colors outline-none placeholder:text-zinc-400 ${
           hasError
@@ -92,12 +95,20 @@ function TextField({
             : 'border-zinc-200 bg-zinc-50 text-zinc-900 focus:border-zinc-400 focus:bg-white'
         }`}
       />
-      {hasError && (
-        <p className="flex items-center gap-1 text-xs text-rose-500">
-          <span aria-hidden>✕</span>
-          {error}
-        </p>
-      )}
+      <AnimatePresence>
+        {hasError && (
+          <motion.p
+            className="flex items-center gap-1 text-xs text-rose-500"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <span aria-hidden>✕</span>
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -140,12 +151,20 @@ function SelectField({
           </option>
         ))}
       </select>
-      {hasError && (
-        <p className="flex items-center gap-1 text-xs text-rose-500">
-          <span aria-hidden>✕</span>
-          {error}
-        </p>
-      )}
+      <AnimatePresence>
+        {hasError && (
+          <motion.p
+            className="flex items-center gap-1 text-xs text-rose-500"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <span aria-hidden>✕</span>
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -209,10 +228,20 @@ function SuccessState({
   onReset: () => void;
 }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-green-100 text-xl text-green-600">
+    <motion.div
+      className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center"
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+    >
+      <motion.div
+        className="flex h-11 w-11 items-center justify-center rounded-full bg-green-100 text-xl text-green-600"
+        initial={{ scale: 0.5 }}
+        animate={{ scale: 1 }}
+        transition={{ type: 'spring', bounce: 0.5, duration: 0.4 }}
+      >
         ✓
-      </div>
+      </motion.div>
       <div>
         <p className="text-sm font-semibold text-green-800">Schema validated</p>
         <p className="mt-0.5 text-xs text-green-600">
@@ -229,7 +258,7 @@ function SuccessState({
       >
         Back to form
       </button>
-    </div>
+    </motion.div>
   );
 }
 
@@ -296,14 +325,10 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    // Required-field gate: z.string() accepts '' by default so we enforce
-    // non-empty ourselves before handing off to safeParse.
     const requiredErrors: Record<string, string> = {};
     for (const field of fields) {
-      if (!field.optional && (field.type === 'string' || field.type === 'number')) {
-        if (String(values[field.name] ?? '').trim() === '') {
-          requiredErrors[field.name] = 'This field is required';
-        }
+      if (!field.optional && field.type === 'string' && values[field.name] === '') {
+        requiredErrors[field.name] = 'This field is required';
       }
     }
     if (Object.keys(requiredErrors).length > 0) {
@@ -342,62 +367,65 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
       <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
-        {fields.map((field) => {
-          if (field.type === 'boolean') {
-            return (
+        {fields.map((field) => (
+          <div key={field.name}>
+            {field.type === 'boolean' ? (
               <BooleanField
-                key={field.name}
                 field={field}
                 value={(values[field.name] as boolean) ?? false}
                 onChange={(v) => setValue(field.name, v)}
               />
-            );
-          }
-          if (field.type === 'enum') {
-            return (
+            ) : field.type === 'enum' ? (
               <SelectField
-                key={field.name}
                 field={field}
                 value={(values[field.name] as string) ?? ''}
                 error={fieldErrors[field.name]}
                 onChange={(v) => setValue(field.name, v)}
               />
-            );
-          }
-          return (
-            <TextField
-              key={field.name}
-              field={field}
-              value={(values[field.name] as string) ?? ''}
-              error={fieldErrors[field.name]}
-              onChange={(v) => setValue(field.name, v)}
-            />
-          );
-        })}
+            ) : (
+              <TextField
+                field={field}
+                value={(values[field.name] as string) ?? ''}
+                error={fieldErrors[field.name]}
+                onChange={(v) => setValue(field.name, v)}
+              />
+            )}
+          </div>
+        ))}
       </div>
 
       <div className="shrink-0 border-t border-zinc-100 px-5 py-4">
         <div className="flex items-center justify-between">
-          {errorCount > 0 ? (
-            <p className="flex items-center gap-1.5 text-xs text-rose-500">
-              <span
-                className="flex h-4 w-4 items-center justify-center rounded-full bg-rose-100 text-[10px] font-bold"
-                aria-hidden
+          <AnimatePresence mode="wait">
+            {errorCount > 0 ? (
+              <motion.p
+                key="errors"
+                className="flex items-center gap-1.5 text-xs text-rose-500"
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.15 }}
               >
-                !
-              </span>
-              {errorCount} field{errorCount > 1 ? 's' : ''} failed validation
-            </p>
-          ) : (
-            <span />
-          )}
-          <button
+                <span
+                  className="flex h-4 w-4 items-center justify-center rounded-full bg-rose-100 text-[10px] font-bold"
+                  aria-hidden
+                >
+                  !
+                </span>
+                {errorCount} field{errorCount > 1 ? 's' : ''} failed validation
+              </motion.p>
+            ) : (
+              <span key="empty" />
+            )}
+          </AnimatePresence>
+          <motion.button
             type="submit"
-            className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+            className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40"
+            whileTap={{ scale: 0.96 }}
           >
             Submit
             <span aria-hidden>→</span>
-          </button>
+          </motion.button>
         </div>
       </div>
     </form>
