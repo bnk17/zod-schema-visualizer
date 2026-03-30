@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { streamSchemaGeneration, GenerationError } from '../api/generate-schema';
+import {
+  streamSchemaGeneration,
+  GenerationError,
+} from '../api/generate-schema';
 import type { GenerationStatus } from '../types/generation';
+const FLUSH_INTERVAL_MS = 80;
 
 export function useSchemaGeneration(): {
   status: GenerationStatus;
@@ -10,12 +14,11 @@ export function useSchemaGeneration(): {
   const [status, setStatus] = useState<GenerationStatus>({ phase: 'idle' });
   const abortRef = useRef<AbortController | null>(null);
   const bufferRef = useRef('');
-  const rafRef = useRef<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const flushBuffer = useCallback(() => {
-    rafRef.current = null;
-    const partial = bufferRef.current;
-    setStatus({ phase: 'streaming', partial });
+    timerRef.current = null;
+    setStatus({ phase: 'streaming', partial: bufferRef.current });
   }, []);
 
   const generate = useCallback(
@@ -24,22 +27,22 @@ export function useSchemaGeneration(): {
       bufferRef.current = '';
       const controller = new AbortController();
       abortRef.current = controller;
-      setStatus({ phase: 'streaming', partial: '' });
+      setStatus({ phase: 'loading' });
 
       streamSchemaGeneration(
         prompt,
         (token) => {
           bufferRef.current += token;
-          if (rafRef.current === null) {
-            rafRef.current = requestAnimationFrame(flushBuffer);
+          if (timerRef.current === null) {
+            timerRef.current = setTimeout(flushBuffer, FLUSH_INTERVAL_MS);
           }
         },
         controller.signal
       )
         .then(() => {
-          if (rafRef.current !== null) {
-            cancelAnimationFrame(rafRef.current);
-            rafRef.current = null;
+          if (timerRef.current !== null) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
           }
           setStatus({ phase: 'done', schema: bufferRef.current });
         })
@@ -57,9 +60,9 @@ export function useSchemaGeneration(): {
 
   const cancel = useCallback(() => {
     abortRef.current?.abort();
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
     setStatus({ phase: 'idle' });
   }, []);
@@ -67,7 +70,7 @@ export function useSchemaGeneration(): {
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
     };
   }, []);
 
