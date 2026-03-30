@@ -1,6 +1,10 @@
 import { useCallback, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { SchemaInput, FormPreview, GeneratePanel } from './features/schema-visualizer';
+import {
+  SchemaInput,
+  FormPreview,
+  GeneratePanel,
+} from './features/schema-visualizer';
 import { SchemaBuilder } from './features/schema-visualizer/builder/components/SchemaBuilder';
 import { parseSchemaText } from './features/schema-visualizer/parse-schema';
 import { TypePanel } from './features/schema-visualizer/components/TypePanel';
@@ -15,7 +19,7 @@ function App() {
   const [parsedSchema, setParsedSchema] =
     useState<ZodObject<ZodRawShape> | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
-  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const modeSwitcherRef = useRef<HTMLDivElement>(null);
 
   const parse = useCallback((text: string) => {
     const result = parseSchemaText(text);
@@ -37,6 +41,7 @@ function App() {
     setSchemaText(schema);
     parse(schema);
     setMode('paste');
+    setTimeout(() => modeSwitcherRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
   }
 
   function handleModeSwitch(next: Mode) {
@@ -45,9 +50,9 @@ function App() {
     setParseError(null);
     setSchemaText('');
     setTimeout(() => {
-      leftPanelRef.current?.scrollIntoView({
+      modeSwitcherRef.current?.scrollIntoView({
         behavior: 'smooth',
-        block: 'nearest',
+        block: 'start',
       });
     }, 0);
   }
@@ -94,7 +99,7 @@ function App() {
       </section>
 
       {/* Mode toggle */}
-      <div className="mx-auto w-full max-w-7xl px-8 pb-5">
+      <div ref={modeSwitcherRef} className="mx-auto w-full max-w-7xl px-8 pb-5">
         <div className="inline-flex rounded-full border border-zinc-200 bg-zinc-50 p-1">
           {(['builder', 'paste', 'generate'] as const).map((m) => (
             <button
@@ -115,7 +120,11 @@ function App() {
                 />
               )}
               <span className="relative">
-                {m === 'builder' ? 'Builder' : m === 'paste' ? 'Paste schema' : 'AI Generate'}
+                {m === 'builder'
+                  ? 'Builder'
+                  : m === 'paste'
+                    ? 'Paste schema'
+                    : 'AI Generate'}
               </span>
             </button>
           ))}
@@ -126,7 +135,7 @@ function App() {
       <section className="mx-auto w-full max-w-7xl flex-1 px-8 pb-5">
         <div className="grid grid-cols-2 gap-5" style={{ minHeight: '520px' }}>
           {/* Left panel */}
-          <div ref={leftPanelRef}>
+          <div>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={mode}

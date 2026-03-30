@@ -31,4 +31,4 @@ client-folder-structure.md
 /blob-report/
 /playwright/.cache/
 .vercel
-.env*.local
+.env*
