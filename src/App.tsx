@@ -1,6 +1,10 @@
 import { useCallback, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { SchemaInput, FormPreview, GeneratePanel } from './features/schema-visualizer';
+import {
+  SchemaInput,
+  FormPreview,
+  GeneratePanel,
+} from './features/schema-visualizer';
 import { SchemaBuilder } from './features/schema-visualizer/builder/components/SchemaBuilder';
 import { parseSchemaText } from './features/schema-visualizer/parse-schema';
 import { TypePanel } from './features/schema-visualizer/components/TypePanel';
@@ -115,7 +119,11 @@ function App() {
                 />
               )}
               <span className="relative">
-                {m === 'builder' ? 'Builder' : m === 'paste' ? 'Paste schema' : 'AI Generate'}
+                {m === 'builder'
+                  ? 'Builder'
+                  : m === 'paste'
+                    ? 'Paste schema'
+                    : 'AI Generate'}
               </span>
             </button>
           ))}
@@ -124,7 +132,10 @@ function App() {
 
       {/* Schema + Preview panels */}
       <section className="mx-auto w-full max-w-7xl flex-1 px-8 pb-5">
-        <div className="grid grid-cols-2 gap-5" style={{ minHeight: '520px' }}>
+        <div
+          className="grid grid-cols-1 gap-5 sm:grid-cols-2"
+          style={{ minHeight: '520px' }}
+        >
           {/* Left panel */}
           <div ref={leftPanelRef}>
             <AnimatePresence mode="wait" initial={false}>
