@@ -83,5 +83,12 @@ describe('parseSchemaText', () => {
       )
       expect(result.ok).toBe(true)
     })
+
+    it('parses a schema with z.date()', () => {
+      const result = parseSchemaText(
+        'z.object({ birthday: z.date(), graduatedAt: z.date().optional() })',
+      )
+      expect(result.ok).toBe(true)
+    })
   })
 })

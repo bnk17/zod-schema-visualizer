@@ -13,6 +13,8 @@ function zodTypeToTs(zodType: ZodTypeAny, indent: number): string {
       return 'number'
     case 'boolean':
       return 'boolean'
+    case 'date':
+      return 'Date'
     case 'enum': {
       const keys = Object.keys(def.entries as Record<string, string>)
       return keys.map(k => `'${k}'`).join(' | ')

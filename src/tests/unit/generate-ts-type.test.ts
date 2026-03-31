@@ -36,6 +36,10 @@ describe('generateTsType', () => {
     expect(result).toMatch(/^type Schema = \{/);
   });
 
+  it('returns "type Schema = Date" for z.date()', () => {
+    expect(generateTsType(z.date())).toBe('type Schema = Date');
+  });
+
   it('falls back to "unknown" for an unrecognised zod type', () => {
     // z.any() has def.type === 'any', which is not handled by the switch
     const result = generateTsType(z.any());

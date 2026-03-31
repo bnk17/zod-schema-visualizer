@@ -23,6 +23,11 @@ const enumSchema = z.object({
   role: z.enum(['admin', 'editor', 'viewer']),
 });
 
+const dateSchema = z.object({
+  birthday: z.date(),
+  graduatedAt: z.date().optional(),
+});
+
 // ── 1. EmptyState ─────────────────────────────────────────────────────────────
 
 describe('EmptyState', () => {
@@ -81,6 +86,11 @@ describe('field rendering', () => {
   it('labels optional fields with "(optional)"', () => {
     render(<FormPreview schema={stringSchema} />);
     expect(screen.getByText(/\(optional\)/i)).toBeInTheDocument();
+  });
+
+  it('renders a date input for a date field', () => {
+    render(<FormPreview schema={dateSchema} />);
+    expect(screen.getByLabelText(/birthday/i)).toHaveAttribute('type', 'date');
   });
 });
 
@@ -245,7 +255,40 @@ describe('submit with valid data shows SuccessState', () => {
   });
 });
 
-// ── 7. Back to form ───────────────────────────────────────────────────────────
+// ── 7. Date field ─────────────────────────────────────────────────────────────
+
+describe('date field', () => {
+  it('shows required error when a date field is left empty', async () => {
+    const user = userEvent.setup();
+    render(<FormPreview schema={dateSchema} />);
+
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    expect(screen.getByText(/this field is required/i)).toBeInTheDocument();
+  });
+
+  it('reaches success state when a valid date is entered', async () => {
+    const user = userEvent.setup();
+    render(<FormPreview schema={dateSchema} />);
+
+    await user.type(screen.getByLabelText(/birthday/i), '2000-06-15');
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    expect(screen.getByText(/schema validated/i)).toBeInTheDocument();
+  });
+
+  it('does not require the optional date field', async () => {
+    const schema = z.object({ startDate: z.date().optional() });
+    const user = userEvent.setup();
+    render(<FormPreview schema={schema} />);
+
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    expect(screen.getByText(/schema validated/i)).toBeInTheDocument();
+  });
+});
+
+// ── 8. Back to form ───────────────────────────────────────────────────────────
 
 describe('Back to form', () => {
   it('clicking "Back to form" returns to the form view', async () => {

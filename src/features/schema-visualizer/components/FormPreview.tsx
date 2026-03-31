@@ -11,7 +11,7 @@ interface FormPreviewProps {
 type FieldDef = {
   name: string;
   label: string;
-  type: 'string' | 'number' | 'boolean' | 'enum' | 'unknown';
+  type: 'string' | 'number' | 'boolean' | 'enum' | 'date' | 'unknown';
   options?: string[];
   optional: boolean;
 };
@@ -52,6 +52,8 @@ function resolveField(key: string, raw: ZodTypeAny): FieldDef {
         type: 'enum',
         options: Object.keys(def.entries as Record<string, string>),
       };
+    case 'date':
+      return { ...base, type: 'date' };
     default:
       return { ...base, type: 'unknown' };
   }
@@ -82,11 +84,11 @@ function TextField({
       </label>
       <input
         id={id}
-        type={field.type === 'number' ? 'number' : 'text'}
+        type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={
-          field.type === 'number' ? '0' : `Enter ${field.label} value`
+          field.type === 'number' ? '0' : field.type === 'date' ? undefined : `Enter ${field.label} value`
         }
         aria-invalid={hasError || undefined}
         className={`rounded-lg border px-3 py-2 text-sm transition-colors outline-none placeholder:text-zinc-400 ${
@@ -291,12 +293,15 @@ function coerceForParse(
   const coerced: Record<string, unknown> = {};
   for (const field of fields) {
     const raw = values[field.name];
-    coerced[field.name] =
-      field.type === 'number' && raw !== ''
-        ? Number(raw)
-        : field.optional && raw === ''
-          ? undefined
-          : raw;
+    if (field.optional && raw === '') {
+      coerced[field.name] = undefined;
+    } else if (field.type === 'number' && raw !== '') {
+      coerced[field.name] = Number(raw);
+    } else if (field.type === 'date' && raw !== '') {
+      coerced[field.name] = new Date(raw as string);
+    } else {
+      coerced[field.name] = raw;
+    }
   }
   return coerced;
 }
@@ -327,7 +332,7 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
 
     const requiredErrors: Record<string, string> = {};
     for (const field of fields) {
-      if (!field.optional && field.type === 'string' && values[field.name] === '') {
+      if (!field.optional && field.type !== 'boolean' && field.type !== 'enum' && values[field.name] === '') {
         requiredErrors[field.name] = 'This field is required';
       }
     }
