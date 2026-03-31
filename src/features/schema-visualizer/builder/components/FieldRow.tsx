@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { TypeSelectPopup } from './TypeSelectPopup'
 import { EnumValuesEditor } from './EnumValuesEditor'
 import { VALIDATORS_BY_TYPE } from '../zod-options'
@@ -13,8 +14,10 @@ interface FieldRowProps {
 
 export function FieldRow({ field, onChange, onRemove, onAddNext }: FieldRowProps) {
   const [showTypePopup, setShowTypePopup] = useState(false)
+  const [popupCoords, setPopupCoords] = useState<{ top: number; left: number } | null>(null)
   const nameRef = useRef<HTMLInputElement>(null)
   const enumInputRef = useRef<HTMLInputElement>(null)
+  const typeButtonRef = useRef<HTMLButtonElement>(null)
 
   function handleNameKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Tab' && !e.shiftKey && field.name.trim()) {
@@ -71,8 +74,15 @@ export function FieldRow({ field, onChange, onRemove, onAddNext }: FieldRowProps
       {/* Type selector button */}
       <div className="relative">
         <button
+          ref={typeButtonRef}
           type="button"
-          onClick={() => setShowTypePopup(true)}
+          onClick={() => {
+            const rect = typeButtonRef.current?.getBoundingClientRect()
+            if (rect) {
+              setPopupCoords({ top: rect.bottom + window.scrollY + 4, left: rect.left + window.scrollX })
+            }
+            setShowTypePopup(true)
+          }}
           className={`rounded-lg border px-3 py-1.5 font-mono text-sm font-medium transition-colors ${
             field.type
               ? 'border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-700'
@@ -84,17 +94,23 @@ export function FieldRow({ field, onChange, onRemove, onAddNext }: FieldRowProps
           {field.type ?? 'type ▾'}
         </button>
 
-        {showTypePopup && (
+        {showTypePopup && popupCoords && createPortal(
           <>
             <div
               className="fixed inset-0 z-40"
               onClick={() => setShowTypePopup(false)}
             />
-            <TypeSelectPopup
-              onSelect={handleTypeSelect}
-              onClose={() => setShowTypePopup(false)}
-            />
-          </>
+            <div
+              className="absolute z-50"
+              style={{ top: popupCoords.top, left: popupCoords.left }}
+            >
+              <TypeSelectPopup
+                onSelect={handleTypeSelect}
+                onClose={() => setShowTypePopup(false)}
+              />
+            </div>
+          </>,
+          document.body
         )}
       </div>
 

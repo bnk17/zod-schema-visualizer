@@ -43,7 +43,7 @@ export function TypeSelectPopup({ onSelect, onClose }: TypeSelectPopupProps) {
       aria-label="Select Zod type"
       tabIndex={-1}
       onKeyDown={handleKeyDown}
-      className="absolute top-full left-0 z-50 mt-1 w-52 rounded-xl border border-zinc-200 bg-white py-1 shadow-xl focus:outline-none"
+      className="w-52 rounded-xl border border-zinc-200 bg-white py-1 shadow-xl focus:outline-none"
     >
       {ZOD_TYPES.map((type, i) => (
         <div
