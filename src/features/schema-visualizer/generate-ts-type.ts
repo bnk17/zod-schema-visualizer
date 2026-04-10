@@ -17,6 +17,8 @@ function zodTypeToTs(zodType: ZodTypeAny, indent: number): string {
       const keys = Object.keys(def.entries as Record<string, string>)
       return keys.map(k => `'${k}'`).join(' | ')
     }
+    case 'date':
+      return 'Date'
     case 'optional':
       return zodTypeToTs(def.innerType as ZodTypeAny, indent)
     case 'object':

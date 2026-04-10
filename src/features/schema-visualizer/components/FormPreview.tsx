@@ -11,7 +11,7 @@ interface FormPreviewProps {
 type FieldDef = {
   name: string;
   label: string;
-  type: 'string' | 'number' | 'boolean' | 'enum' | 'unknown';
+  type: 'string' | 'number' | 'boolean' | 'enum' | 'date' | 'unknown';
   options?: string[];
   optional: boolean;
 };
@@ -52,6 +52,8 @@ function resolveField(key: string, raw: ZodTypeAny): FieldDef {
         type: 'enum',
         options: Object.keys(def.entries as Record<string, string>),
       };
+    case 'date':
+      return { ...base, type: 'date' };
     default:
       return { ...base, type: 'unknown' };
   }
@@ -204,6 +206,57 @@ function BooleanField({
   );
 }
 
+function DateField({
+  field,
+  value,
+  error,
+  onChange,
+}: {
+  field: FieldDef;
+  value: string;
+  error?: string;
+  onChange: (v: string) => void;
+}) {
+  const hasError = Boolean(error);
+  const id = `field-${field.name}`;
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-xs font-medium text-zinc-500">
+        {field.label}
+        {field.optional && (
+          <span className="ml-1 font-normal text-zinc-400">(optional)</span>
+        )}
+      </label>
+      <input
+        id={id}
+        type="date"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-invalid={hasError || undefined}
+        className={`rounded-lg border px-3 py-2 text-sm transition-colors outline-none ${
+          hasError
+            ? 'border-rose-200 bg-rose-50 text-rose-900 focus:border-rose-400'
+            : 'border-zinc-200 bg-zinc-50 text-zinc-900 focus:border-zinc-400 focus:bg-white'
+        }`}
+      />
+      <AnimatePresence>
+        {hasError && (
+          <motion.p
+            className="flex items-center gap-1 text-xs text-rose-500"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <span aria-hidden>✕</span>
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ── empty / feedback states ──────────────────────────────────────────────────
 
 function EmptyState() {
@@ -279,7 +332,7 @@ function buildDefaults(fields: FieldDef[]): Record<string, unknown> {
         ? false
         : field.type === 'enum'
           ? (field.options?.[0] ?? '')
-          : '';
+          : ''  // covers string, number, date, unknown
   }
   return defaults;
 }
@@ -294,9 +347,11 @@ function coerceForParse(
     coerced[field.name] =
       field.type === 'number' && raw !== ''
         ? Number(raw)
-        : field.optional && raw === ''
-          ? undefined
-          : raw;
+        : field.type === 'date' && typeof raw === 'string' && raw !== ''
+          ? new Date(raw)
+          : field.optional && raw === ''
+            ? undefined
+            : raw;
   }
   return coerced;
 }
@@ -329,7 +384,7 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
     // non-empty ourselves before handing off to safeParse.
     const requiredErrors: Record<string, string> = {};
     for (const field of fields) {
-      if (!field.optional && (field.type === 'string' || field.type === 'number')) {
+      if (!field.optional && (field.type === 'string' || field.type === 'number' || field.type === 'date')) {
         if (String(values[field.name] ?? '').trim() === '') {
           requiredErrors[field.name] = 'This field is required';
         }
@@ -386,6 +441,20 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
                 error={fieldErrors[field.name]}
                 onChange={(v) => setValue(field.name, v)}
               />
+            ) : field.type === 'date' ? (
+              <DateField
+                field={field}
+                value={(values[field.name] as string) ?? ''}
+                error={fieldErrors[field.name]}
+                onChange={(v) => setValue(field.name, v)}
+              />
+            ) : field.type === 'unknown' ? (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs font-medium text-zinc-500">{field.label}</span>
+                <div className="rounded-lg border border-dashed border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-400">
+                  Unsupported field type
+                </div>
+              </div>
             ) : (
               <TextField
                 field={field}
