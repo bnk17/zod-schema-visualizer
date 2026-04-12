@@ -39,18 +39,26 @@ function stripFramerProps(props: Record<string, unknown>) {
 }
 
 // Build motion.div, motion.button, motion.span, etc. on demand.
+// Cache per-tag so React sees the same component type across re-renders —
+// without this, each render access creates a new forwardRef identity, causing
+// React to unmount and remount the element (detaching event handlers mid-click).
+const motionCache: Record<string, React.ForwardRefExoticComponent<React.PropsWithoutRef<Record<string, unknown>>>> = {}
+
 export const motion = new Proxy(
   {},
   {
     get(_target, tag: string) {
-      return React.forwardRef<unknown, Record<string, unknown>>(
-        ({ children, ...rest }, ref) =>
-          React.createElement(
-            tag,
-            { ...stripFramerProps(rest), ref },
-            children as React.ReactNode,
-          ),
-      );
+      if (!motionCache[tag]) {
+        motionCache[tag] = React.forwardRef<unknown, Record<string, unknown>>(
+          ({ children, ...rest }, ref) =>
+            React.createElement(
+              tag,
+              { ...stripFramerProps(rest), ref },
+              children as React.ReactNode,
+            ),
+        )
+      }
+      return motionCache[tag]
     },
   },
 ) as Record<string, React.ForwardRefExoticComponent<React.PropsWithoutRef<Record<string, unknown>>>>;

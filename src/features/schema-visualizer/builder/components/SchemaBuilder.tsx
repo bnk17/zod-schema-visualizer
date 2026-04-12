@@ -62,7 +62,7 @@ export function SchemaBuilder({ onChange }: SchemaBuilderProps) {
           ✦
         </span>
         <span className="text-sm font-semibold text-zinc-900">Builder</span>
-        <span className="ml-auto font-mono text-xs text-zinc-400">
+        <span className="ml-auto hidden font-mono text-xs text-zinc-400 sm:block">
           Tab → pick type · Enter → next field
         </span>
       </div>
@@ -75,11 +75,10 @@ export function SchemaBuilder({ onChange }: SchemaBuilderProps) {
               key={field.id}
               data-field-row
               ref={i === fields.length - 1 ? lastFieldRef : undefined}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+              animate={{ opacity: 1, height: 'auto', overflow: 'visible' }}
+              exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              style={{ overflow: 'hidden' }}
             >
               <FieldRow
                 field={field}

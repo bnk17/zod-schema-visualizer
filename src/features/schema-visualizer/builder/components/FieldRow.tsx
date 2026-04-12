@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { TypeSelectPopup } from './TypeSelectPopup'
 import { EnumValuesEditor } from './EnumValuesEditor'
 import { VALIDATORS_BY_TYPE } from '../zod-options'
@@ -13,13 +14,21 @@ interface FieldRowProps {
 
 export function FieldRow({ field, onChange, onRemove, onAddNext }: FieldRowProps) {
   const [showTypePopup, setShowTypePopup] = useState(false)
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null)
   const nameRef = useRef<HTMLInputElement>(null)
+  const typeButtonRef = useRef<HTMLButtonElement>(null)
   const enumInputRef = useRef<HTMLInputElement>(null)
+
+  function openTypePopup() {
+    const rect = typeButtonRef.current?.getBoundingClientRect()
+    if (rect) setAnchorRect(rect)
+    setShowTypePopup(true)
+  }
 
   function handleNameKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Tab' && !e.shiftKey && field.name.trim()) {
       e.preventDefault()
-      setShowTypePopup(true)
+      openTypePopup()
     }
     if (e.key === 'Enter' && field.type !== null) {
       e.preventDefault()
@@ -62,41 +71,37 @@ export function FieldRow({ field, onChange, onRemove, onAddNext }: FieldRowProps
         onChange={e => onChange({ ...field, name: e.target.value })}
         onKeyDown={handleNameKeyDown}
         placeholder="field name"
-        className="w-36 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 font-mono text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-400 focus:bg-white"
+        className="min-w-0 w-32 sm:w-36 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 font-mono text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-400 focus:bg-white"
         aria-label="Field name"
         autoComplete="off"
         spellCheck={false}
       />
 
       {/* Type selector button */}
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => setShowTypePopup(true)}
-          className={`rounded-lg border px-3 py-1.5 font-mono text-sm font-medium transition-colors ${
-            field.type
-              ? 'border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-700'
-              : 'border-zinc-200 bg-zinc-50 text-zinc-400 hover:border-zinc-300 hover:text-zinc-600'
-          }`}
-          aria-haspopup="listbox"
-          aria-expanded={showTypePopup}
-        >
-          {field.type ?? 'type ▾'}
-        </button>
+      <button
+        ref={typeButtonRef}
+        type="button"
+        onClick={openTypePopup}
+        className={`rounded-lg border px-3 py-1.5 font-mono text-sm font-medium transition-colors ${
+          field.type
+            ? 'border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-700'
+            : 'border-zinc-200 bg-zinc-50 text-zinc-400 hover:border-zinc-300 hover:text-zinc-600'
+        }`}
+        aria-haspopup="listbox"
+        aria-expanded={showTypePopup}
+      >
+        {field.type ?? 'type ▾'}
+      </button>
 
-        {showTypePopup && (
-          <>
-            <div
-              className="fixed inset-0 z-40"
-              onClick={() => setShowTypePopup(false)}
-            />
-            <TypeSelectPopup
-              onSelect={handleTypeSelect}
-              onClose={() => setShowTypePopup(false)}
-            />
-          </>
+      <AnimatePresence>
+        {showTypePopup && anchorRect && (
+          <TypeSelectPopup
+            anchor={anchorRect}
+            onSelect={handleTypeSelect}
+            onClose={() => setShowTypePopup(false)}
+          />
         )}
-      </div>
+      </AnimatePresence>
 
       {/* Enum values editor */}
       {field.type === 'enum' && (

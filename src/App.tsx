@@ -56,7 +56,7 @@ function App() {
     <div className="flex min-h-svh flex-col bg-white text-zinc-900">
       {/* Top nav */}
       <header className="sticky top-0 z-10 border-b border-zinc-100 bg-white/80 backdrop-blur-sm">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-8 py-4">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-8">
           <span className="font-mono text-sm font-semibold tracking-tight text-zinc-900">
             zod-schema-visualizer
           </span>
@@ -67,8 +67,8 @@ function App() {
       </header>
 
       {/* Hero */}
-      <section className="mx-auto w-full max-w-7xl px-8 pt-10 pb-12">
-        <h1 className="max-w-4xl text-4xl leading-tight font-semibold tracking-tight text-zinc-900">
+      <section className="mx-auto w-full max-w-7xl px-4 pt-10 pb-12 sm:px-8">
+        <h1 className="max-w-4xl text-2xl leading-tight font-semibold tracking-tight text-zinc-900 sm:text-4xl">
           A live Zod schema visualizer that parses your schema and generates a
           type-safe form in real time.
         </h1>
@@ -94,7 +94,7 @@ function App() {
       </section>
 
       {/* Mode toggle */}
-      <div className="mx-auto w-full max-w-7xl px-8 pb-5">
+      <div className="mx-auto w-full max-w-7xl px-4 pb-5 sm:px-8">
         <div className="inline-flex rounded-full border border-zinc-200 bg-zinc-50 p-1">
           {(['builder', 'paste', 'generate'] as const).map((m) => (
             <button
@@ -123,7 +123,7 @@ function App() {
       </div>
 
       {/* Schema + Preview panels */}
-      <section className="mx-auto w-full max-w-7xl flex-1 px-8 pb-5">
+      <section className="mx-auto w-full max-w-7xl flex-1 px-4 pb-5 sm:px-8">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:min-h-[520px]">
           {/* Left panel */}
           <div ref={leftPanelRef}>
@@ -188,7 +188,7 @@ function App() {
       </AnimatePresence>
 
       {/* Footer */}
-      <footer className="flex shrink-0 items-center justify-between border-t border-zinc-200 px-8 py-4 text-sm text-zinc-400">
+      <footer className="flex shrink-0 items-center justify-between border-t border-zinc-200 px-4 py-4 text-sm text-zinc-400 sm:px-8">
         <span>
           © 2025 — <span className="text-zinc-600">Paul Bilbao</span>
         </span>
