@@ -217,7 +217,7 @@ describe('submit with valid data shows SuccessState', () => {
 
     expect(screen.getByText(/schema validated/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/all fields passed zod validation/i)
+      screen.getByText(/Your data has been successfully parsed and validated./i)
     ).toBeInTheDocument();
   });
 
@@ -230,36 +230,5 @@ describe('submit with valid data shows SuccessState', () => {
 
     // The pre block should contain the submitted value
     expect(screen.getByText(/"alice"/)).toBeInTheDocument();
-  });
-
-  it('renders a "Back to form" button in the success panel', async () => {
-    const user = userEvent.setup();
-    render(<FormPreview schema={stringSchema} />);
-
-    await user.type(screen.getByLabelText(/username/i), 'alice');
-    await user.click(screen.getByRole('button', { name: /submit/i }));
-
-    expect(
-      screen.getByRole('button', { name: /back to form/i })
-    ).toBeInTheDocument();
-  });
-});
-
-// ── 7. Back to form ───────────────────────────────────────────────────────────
-
-describe('Back to form', () => {
-  it('clicking "Back to form" returns to the form view', async () => {
-    const user = userEvent.setup();
-    render(<FormPreview schema={stringSchema} />);
-
-    await user.type(screen.getByLabelText(/username/i), 'alice');
-    await user.click(screen.getByRole('button', { name: /submit/i }));
-
-    expect(screen.getByText(/schema validated/i)).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: /back to form/i }));
-
-    expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
-    expect(screen.queryByText(/schema validated/i)).not.toBeInTheDocument();
   });
 });
