@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { type Variants, AnimatePresence, motion } from 'framer-motion';
 import { type ZodObject, type ZodRawShape, type ZodTypeAny } from 'zod';
+import { Check, Copy, Database, ShieldCheck } from 'lucide-react';
 
 interface FormPreviewProps {
   schema: ZodObject<ZodRawShape> | null;
@@ -272,45 +273,124 @@ function EmptyState() {
     </div>
   );
 }
+function SuccessState({ values }: { values: Record<string, unknown> }) {
+  const [copied, setCopied] = React.useState(false);
 
-function SuccessState({
-  values,
-  onReset,
-}: {
-  values: Record<string, unknown>;
-  onReset: () => void;
-}) {
+  const handleCopy = () => {
+    const jsonString = JSON.stringify(values, null, 2);
+    const textArea = document.createElement('textarea');
+    textArea.value = jsonString;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
+    document.body.removeChild(textArea);
+  };
+
+  // Explicitly typing variants to resolve the TS 'string' vs 'AnimationGeneratorType' conflict
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 260,
+        damping: 20,
+      },
+    },
+  };
+
   return (
     <motion.div
-      className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center"
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center px-6 py-12"
     >
-      <motion.div
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-green-100 text-xl text-green-600"
-        initial={{ scale: 0.5 }}
-        animate={{ scale: 1 }}
-        transition={{ type: 'spring', bounce: 0.5, duration: 0.4 }}
-      >
-        ✓
+      {/* Premium Animated Icon Section */}
+      <motion.div variants={itemVariants} className="relative mb-6">
+        <motion.div
+          className="absolute inset-0 rounded-full bg-emerald-400/20 blur-2xl"
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 4, repeat: Infinity }}
+        />
+        <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-xl shadow-emerald-500/20">
+          <motion.div
+            initial={{ scale: 0, rotate: -45 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: 0.2, type: 'spring', bounce: 0.5 }}
+          >
+            <ShieldCheck className="h-10 w-10 text-white" strokeWidth={2.5} />
+          </motion.div>
+        </div>
       </motion.div>
-      <div>
-        <p className="text-sm font-semibold text-green-800">Schema validated</p>
-        <p className="mt-0.5 text-xs text-green-600">
-          All fields passed Zod validation
+
+      {/* Header Text */}
+      <motion.div variants={itemVariants} className="mb-8 text-center">
+        <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          Schema Validated
+        </h2>
+        <p className="mx-auto mt-2 max-w-xs text-sm text-zinc-500 dark:text-zinc-400">
+          Your data has been successfully parsed and validated.
         </p>
-      </div>
-      <pre className="max-h-44 w-full overflow-auto rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-left font-mono text-xs text-green-700">
-        {JSON.stringify(values, null, 2)}
-      </pre>
-      <button
-        type="button"
-        onClick={onReset}
-        className="text-xs text-zinc-400 underline-offset-2 hover:text-zinc-700 hover:underline"
+      </motion.div>
+
+      {/* Modern JSON Data Card */}
+      <motion.div
+        variants={itemVariants}
+        className="group relative w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950"
       >
-        Back to form
-      </button>
+        <div className="flex items-center justify-between border-b border-zinc-100 bg-zinc-50/50 px-4 py-2.5 dark:border-zinc-900 dark:bg-zinc-900/50">
+          <div className="flex items-center gap-2">
+            <Database className="h-4 w-4 text-zinc-400" />
+            <span className="text-[11px] font-bold tracking-wider text-zinc-500 uppercase">
+              Validated Output
+            </span>
+          </div>
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-200 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          >
+            {copied ? (
+              <span className="flex items-center gap-1.5 text-emerald-500">
+                <Check className="h-3.5 w-3.5" /> Copied
+              </span>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5" /> Copy JSON
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="p-4">
+          <pre className="scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800 max-h-80 w-full overflow-auto text-left font-mono text-[13px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+            {JSON.stringify(values, null, 2)}
+          </pre>
+        </div>
+      </motion.div>
+
+      {/* Background Decorative Element */}
+      <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center opacity-30 dark:opacity-10">
+        <div className="h-[400px] w-[400px] rounded-full bg-emerald-500/10 blur-[100px]" />
+      </div>
     </motion.div>
   );
 }
@@ -332,7 +412,7 @@ function buildDefaults(fields: FieldDef[]): Record<string, unknown> {
         ? false
         : field.type === 'enum'
           ? (field.options?.[0] ?? '')
-          : ''  // covers string, number, date, unknown
+          : ''; // covers string, number, date, unknown
   }
   return defaults;
 }
@@ -384,7 +464,12 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
     // non-empty ourselves before handing off to safeParse.
     const requiredErrors: Record<string, string> = {};
     for (const field of fields) {
-      if (!field.optional && (field.type === 'string' || field.type === 'number' || field.type === 'date')) {
+      if (
+        !field.optional &&
+        (field.type === 'string' ||
+          field.type === 'number' ||
+          field.type === 'date')
+      ) {
         if (String(values[field.name] ?? '').trim() === '') {
           requiredErrors[field.name] = 'This field is required';
         }
@@ -413,12 +498,7 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
   }
 
   if (submitted) {
-    return (
-      <SuccessState
-        values={coerceForParse(fields, values)}
-        onReset={() => setSubmitted(false)}
-      />
-    );
+    return <SuccessState values={coerceForParse(fields, values)} />;
   }
 
   const errorCount = Object.keys(fieldErrors).length;
@@ -450,7 +530,9 @@ function FormFields({ schema }: { schema: ZodObject<ZodRawShape> }) {
               />
             ) : field.type === 'unknown' ? (
               <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-zinc-500">{field.label}</span>
+                <span className="text-xs font-medium text-zinc-500">
+                  {field.label}
+                </span>
                 <div className="rounded-lg border border-dashed border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-400">
                   Unsupported field type
                 </div>
